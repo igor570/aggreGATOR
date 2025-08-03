@@ -37,7 +37,6 @@ func (c *Config) ReadConfig() error {
 		return err
 	}
 
-	fmt.Printf("Created struct with properties: %+v\n", c)
 	return nil
 }
 
