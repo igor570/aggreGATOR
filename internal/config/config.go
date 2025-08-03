@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const gaterConfig = "../gaterconfig.json"
+const gaterConfig = "~/.gaterconfig.json"
 
 type Config struct {
 	DatabaseURL string `json:"db_url"`
@@ -44,7 +44,6 @@ func (c *Config) SetUser(userName string) error {
 	}
 
 	c.UserName = userName
-	c.DatabaseURL = "postgres://example"
 
 	data, err := json.MarshalIndent(c, "", " ")
 
