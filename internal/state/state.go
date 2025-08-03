@@ -2,7 +2,8 @@ package state
 
 import "github.com/igor570/aggregator/internal/config"
 
-// This seems brittle af and is just a wrapper around cfg, do we need it?
+// State will hold all the things that need to have commands run against
+// For now it is just the config
 
 type State struct {
 	Config *config.Config
