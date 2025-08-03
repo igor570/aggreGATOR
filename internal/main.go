@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/igor570/aggregator/internal/commands"
 	"github.com/igor570/aggregator/internal/config"
@@ -19,5 +20,12 @@ func main() {
 	appCommands := commands.Commands{}
 
 	appCommands.Register("login", handlers.HandlerLogin)
+
+	userArgs := os.Args
+
+	if len(userArgs) < 3 {
+		fmt.Println("Arguments should follow <handler> <argument>")
+		os.Exit(1)
+	}
 
 }
