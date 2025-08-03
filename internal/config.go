@@ -44,7 +44,7 @@ func (c *Config) SetUser(userName string) error {
 	}
 
 	c.UserName = userName
-	c.DatabaseURL = "placeholderURL"
+	c.DatabaseURL = "postgres://example"
 
 	data, err := json.MarshalIndent(c, "", " ")
 
