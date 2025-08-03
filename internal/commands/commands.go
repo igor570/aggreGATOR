@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/igor570/aggregator/internal/config"
+	"github.com/igor570/aggregator/internal/state"
 )
 
 type Command struct {
@@ -12,18 +12,18 @@ type Command struct {
 }
 
 type Commands struct {
-	Commands map[string]func(*config.Config, Command) error
+	Commands map[string]func(*state.State, Command) error
 }
 
-func (c *Commands) Run(cfg *config.Config, cmd Command) error {
+func (c *Commands) Run(s *state.State, cmd Command) error {
 	handler, exists := c.Commands[cmd.Name]
 	if !exists {
 		return fmt.Errorf("Handler not found")
 	}
-	return handler(cfg, cmd)
+	return handler(s, cmd)
 }
 
-func (c *Commands) Register(name string, f func(*config.Config, Command) error) error {
+func (c *Commands) Register(name string, f func(*state.State, Command) error) error {
 	if name == "" {
 		return fmt.Errorf("Cannot find a handler with an empty name, can't index with empty string")
 	}

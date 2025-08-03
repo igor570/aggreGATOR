@@ -4,20 +4,17 @@ import (
 	"fmt"
 
 	"github.com/igor570/aggregator/internal/commands"
-	"github.com/igor570/aggregator/internal/config"
+	"github.com/igor570/aggregator/internal/state"
 )
 
-func HandlerLogin(cfg *config.Config, cmd commands.Command) error {
+func HandlerLogin(st *state.State, cmd commands.Command) error {
 	if len(cmd.Arguments) < 1 {
 		return fmt.Errorf("No username provided")
 	}
 	username := cmd.Arguments[0] // This should be "boots"
-
-	if err := cfg.SetUser(username); err != nil {
+	if err := st.Config.SetUser(username); err != nil {
 		return err
 	}
-
 	fmt.Printf("Successfully set the user %s, to the config\n", username)
-
 	return nil
 }
