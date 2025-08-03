@@ -7,18 +7,14 @@ import (
 	"github.com/igor570/aggregator/internal/state"
 )
 
-func HandlerLogin(s *state.State, cmd commands.Command) error {
-	if cmd.Arguments == nil {
-		return fmt.Errorf("Command arguments cannot be empty")
+func HandlerLogin(st *state.State, cmd commands.Command) error {
+	if len(cmd.Arguments) < 1 {
+		return fmt.Errorf("No username provided")
 	}
-
-	err := s.Config.SetUser(cmd.Name)
-
-	if err != nil {
-		return fmt.Errorf("%v", err)
+	username := cmd.Arguments[0] // This should be "boots"
+	if err := st.Config.SetUser(username); err != nil {
+		return err
 	}
-
-	fmt.Printf("Successfully set the user %v, to the config", cmd.Name)
-
+	fmt.Printf("Successfully set the user %s, to the config\n", username)
 	return nil
 }

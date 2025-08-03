@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
-const gaterConfig = "~/.gaterconfig.json"
+const gatorConfigFile = ".gatorconfig.json"
 
 type Config struct {
 	DatabaseURL string `json:"db_url"`
@@ -20,21 +21,23 @@ func NewConfig() *Config {
 }
 
 func (c *Config) ReadConfig() error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	configPath := filepath.Join(home, gatorConfigFile)
 
-	jsonData, err := os.ReadFile(gaterConfig)
-
+	jsonData, err := os.ReadFile(configPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	err = json.Unmarshal(jsonData, c)
-
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Created struct with properties: %+v\n", c)
-
 	return nil
 }
 
@@ -46,12 +49,15 @@ func (c *Config) SetUser(userName string) error {
 	c.UserName = userName
 
 	data, err := json.MarshalIndent(c, "", " ")
-
 	if err != nil {
 		return err
 	}
 
-	os.WriteFile(gaterConfig, data, 0666)
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	configPath := filepath.Join(home, gatorConfigFile)
 
-	return nil
+	return os.WriteFile(configPath, data, 0666)
 }
