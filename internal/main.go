@@ -7,7 +7,6 @@ import (
 	"github.com/igor570/aggregator/internal/commands"
 	"github.com/igor570/aggregator/internal/config"
 	"github.com/igor570/aggregator/internal/handlers"
-	"github.com/igor570/aggregator/internal/state"
 )
 
 func main() {
@@ -16,10 +15,8 @@ func main() {
 		fmt.Println("Error reading the file:", err)
 	}
 
-	st := &state.State{Config: cfg} // set the config inside of state to pass it around
-
 	// make an empty commands list
-	appCommands := commands.Commands{Commands: make(map[string]func(*state.State, commands.Command) error)}
+	appCommands := commands.Commands{Commands: make(map[string]func(*config.Config, commands.Command) error)}
 
 	// Register our commands with their handlers
 	appCommands.Register("login", handlers.HandlerLogin)
@@ -39,7 +36,7 @@ func main() {
 	}
 
 	// Run a command against the args
-	err := appCommands.Run(st, cmd)
+	err := appCommands.Run(cfg, cmd)
 
 	if err != nil {
 		fmt.Println("Error:", err)
