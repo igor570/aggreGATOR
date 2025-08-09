@@ -38,7 +38,8 @@ func main() {
 	appCommands := commands.Commands{Commands: make(map[string]func(*state.State, commands.Command) error)}
 
 	// Register our commands with their handlers
-	appCommands.Register("login", handlers.HandlerLogin)
+	// appCommands.Register("login", handlers.HandlerLogin) // TODO: Redo this crap
+	appCommands.Register("register", handlers.HandlerRegister)
 
 	// Pull out user arguments
 	userArgs := os.Args

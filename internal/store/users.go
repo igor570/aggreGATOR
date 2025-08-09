@@ -14,7 +14,7 @@ type PgUserStore struct {
 }
 
 type UserStore interface {
-	CreateUser(user *User) (*User, error)
+	CreateUser(name string) (*User, error)
 }
 
 func NewUserStore(db *sql.DB) *PgUserStore {
@@ -23,7 +23,7 @@ func NewUserStore(db *sql.DB) *PgUserStore {
 	}
 }
 
-func (s *PgUserStore) CreateUser(user *User) (*User, error) {
+func (s *PgUserStore) CreateUser(name string) (*User, error) {
 	var u User
 
 	query := `
@@ -32,7 +32,7 @@ func (s *PgUserStore) CreateUser(user *User) (*User, error) {
         RETURNING id, created_at, updated_at, name;
     `
 
-	row := s.db.QueryRow(query, user.Name)
+	row := s.db.QueryRow(query, name)
 	err := row.Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt, &u.Name)
 
 	if err != nil {
