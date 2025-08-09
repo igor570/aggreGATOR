@@ -6,17 +6,25 @@ import (
 
 	"github.com/igor570/aggregator/internal/commands"
 	"github.com/igor570/aggregator/internal/config"
+	"github.com/igor570/aggregator/internal/db"
 	"github.com/igor570/aggregator/internal/handlers"
 	"github.com/igor570/aggregator/internal/state"
 )
 
 func main() {
 	cfg := config.NewConfig() // instantiate our config
+
 	if err := cfg.ReadConfig(); err != nil {
 		fmt.Println("Error reading the file:", err)
 	}
 
-	st := &state.State{Config: cfg} // set the config inside of state to pass it around
+	db, err := db.Open()
+
+	if err := cfg.ReadConfig(); err != nil {
+		fmt.Println("Error launching DB", err)
+	}
+
+	st := &state.State{Config: cfg, DB: db} // set the config inside of state to pass it around
 
 	// make an empty commands list
 	appCommands := commands.Commands{Commands: make(map[string]func(*state.State, commands.Command) error)}
@@ -39,7 +47,7 @@ func main() {
 	}
 
 	// Run a command against the args
-	err := appCommands.Run(st, cmd)
+	err = appCommands.Run(st, cmd)
 
 	if err != nil {
 		fmt.Println("Error:", err)
