@@ -15,6 +15,7 @@ type PgUserStore struct {
 
 type UserStore interface {
 	CreateUser(name string) (*User, error)
+	GetAllUsers() ([]*User, error)
 }
 
 func NewUserStore(db *sql.DB) *PgUserStore {
@@ -33,6 +34,7 @@ func (s *PgUserStore) CreateUser(name string) (*User, error) {
     `
 
 	row := s.db.QueryRow(query, name)
+
 	err := row.Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt, &u.Name)
 
 	if err != nil {
@@ -41,3 +43,44 @@ func (s *PgUserStore) CreateUser(name string) (*User, error) {
 
 	return &u, nil
 }
+
+func (s *PgUserStore) GetAllUsers() ([]*User, error) {
+	query := `SELECT id, created_at, updated_at, name FROM users`
+	rows, err := s.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		var u User
+		err := rows.Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt, &u.Name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, &u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+// func (s *PgUserStore) DeleteAllUsers() error {
+// 	query := `
+//         TRUNCATE TABLE users;
+//     `
+// 	_, err := s.db.Exec(query) // use exec for not expecting returned rows
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+
+// }

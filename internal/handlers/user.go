@@ -24,3 +24,18 @@ func HandlerRegister(st *state.State, cmd commands.Command) error {
 
 	return nil
 }
+
+func HandleGetAllUsers(st *state.State, cmd commands.Command) error {
+
+	users, err := st.UserStore.GetAllUsers()
+
+	if err != nil {
+		return err
+	}
+
+	for i, user := range users {
+		fmt.Printf("User %d is: %v\n", i, user.Name)
+	}
+
+	return nil
+}

@@ -40,12 +40,13 @@ func main() {
 	// Register our commands with their handlers
 	// appCommands.Register("login", handlers.HandlerLogin) // TODO: Redo this crap
 	appCommands.Register("register", handlers.HandlerRegister)
+	appCommands.Register("users", handlers.HandleGetAllUsers)
 
 	// Pull out user arguments
 	userArgs := os.Args
 
-	if len(userArgs) < 3 {
-		fmt.Println("Arguments should follow <handler> <argument>")
+	if len(userArgs) < 2 {
+		fmt.Println("Arguments should follow <handler> [argument...]")
 		os.Exit(1)
 	}
 
