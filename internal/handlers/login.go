@@ -7,6 +7,7 @@ import (
 	"github.com/igor570/aggregator/internal/state"
 )
 
+// UNUSED
 func HandlerLogin(st *state.State, cmd commands.Command) error {
 	if len(cmd.Arguments) < 1 {
 		return fmt.Errorf("No username provided")
