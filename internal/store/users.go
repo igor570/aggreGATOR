@@ -17,8 +17,8 @@ type UserStore interface {
 	CreateUser(user *User) (*User, error)
 }
 
-func NewUserStore(db *sql.DB) *UserStore {
-	return &UserStore{
+func NewUserStore(db *sql.DB) *PgUserStore {
+	return &PgUserStore{
 		db: db,
 	}
 }
