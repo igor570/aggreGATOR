@@ -1,4 +1,4 @@
-package db
+package store
 
 import "database/sql"
 
@@ -14,11 +14,11 @@ type PgUserStore struct {
 }
 
 type UserStore interface {
-	CreateUser(db *sql.DB) (*User, error)
+	CreateUser(user *User) (*User, error)
 }
 
-func NewUserStore(db *sql.DB) *PgUserStore {
-	return &PgUserStore{
+func NewUserStore(db *sql.DB) *UserStore {
+	return &UserStore{
 		db: db,
 	}
 }

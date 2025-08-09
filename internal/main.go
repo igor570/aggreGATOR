@@ -9,6 +9,7 @@ import (
 	"github.com/igor570/aggregator/internal/db"
 	"github.com/igor570/aggregator/internal/handlers"
 	"github.com/igor570/aggregator/internal/state"
+	"github.com/igor570/aggregator/internal/store"
 )
 
 func main() {
@@ -24,7 +25,14 @@ func main() {
 		fmt.Println("Error launching DB", err)
 	}
 
-	st := &state.State{Config: cfg, DB: db} // set the config inside of state to pass it around
+	// stores
+	userStore := store.NewUserStore(db)
+
+	st := &state.State{
+		Config:    cfg,
+		DB:        db,
+		UserStore: userStore,
+	}
 
 	// make an empty commands list
 	appCommands := commands.Commands{Commands: make(map[string]func(*state.State, commands.Command) error)}
