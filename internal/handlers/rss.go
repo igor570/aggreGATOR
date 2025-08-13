@@ -10,6 +10,7 @@ import (
 
 	"github.com/igor570/aggregator/internal/commands"
 	"github.com/igor570/aggregator/internal/state"
+	"github.com/igor570/aggregator/internal/utils"
 )
 
 type RSSFeed struct {
@@ -29,6 +30,13 @@ type RSSItem struct {
 }
 
 func HandleFetchFeed(st *state.State, cmd commands.Command) error {
+	_, err := utils.CheckAuth() // essentially auth middleware
+
+	if err != nil {
+		return fmt.Errorf("No user is logged in. You must be logged in to fetch a Feed.")
+
+	}
+
 	if len(cmd.Arguments) < 1 {
 		return fmt.Errorf("No url to fetch provided")
 	}
@@ -36,6 +44,7 @@ func HandleFetchFeed(st *state.State, cmd commands.Command) error {
 	url := cmd.Arguments[0]
 
 	var rss RSSFeed
+
 	ctx := context.Background()
 	client := &http.Client{} // make a http client
 
@@ -80,6 +89,14 @@ func HandleFetchFeed(st *state.State, cmd commands.Command) error {
 
 	for _, item := range rss.Channel.Item {
 		fmt.Printf("Item: %s\n", html.UnescapeString(item.Title))
+
+		/* TODO: We now need to add each item to Feeds
+		Each channel.item is one entry
+		each entry will use the user id
+
+		how do we get the user_id of the user that's using the app?
+		*/
+		st.FeedStore.CreateFeed(item.Title, url)
 	}
 
 	return nil

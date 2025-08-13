@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/igor570/aggregator/internal/commands"
-	"github.com/igor570/aggregator/internal/config"
 	"github.com/igor570/aggregator/internal/db"
 	"github.com/igor570/aggregator/internal/handlers"
 	"github.com/igor570/aggregator/internal/state"
@@ -13,25 +12,25 @@ import (
 )
 
 func main() {
-	cfg := config.NewConfig() // instantiate our config
-
-	if err := cfg.ReadConfig(); err != nil {
-		fmt.Println("Error reading the file:", err)
-	}
-
 	db, err := db.Open()
 
-	if err := cfg.ReadConfig(); err != nil {
+	if err != nil {
 		fmt.Println("Error launching DB", err)
+	}
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
 	}
 
 	// stores
 	userStore := store.NewUserStore(db)
+	feedStore := store.NewFeedStore(db)
 
 	st := &state.State{
-		Config:    cfg,
 		DB:        db,
 		UserStore: userStore,
+		FeedStore: feedStore,
 	}
 
 	// make an empty commands list
@@ -39,6 +38,7 @@ func main() {
 
 	// Register our commands with their handlers
 	appCommands.Register("register", handlers.HandlerRegister)
+	appCommands.Register("login", handlers.HandleLoginUser)
 	appCommands.Register("users", handlers.HandleGetAllUsers)
 	appCommands.Register("agg", handlers.HandleFetchFeed)
 

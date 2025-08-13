@@ -16,12 +16,26 @@ type PgUserStore struct {
 type UserStore interface {
 	CreateUser(name string) (*User, error)
 	GetAllUsers() ([]*User, error)
+	GetUser(name string) (*User, error)
 }
 
 func NewUserStore(db *sql.DB) *PgUserStore {
 	return &PgUserStore{
 		db: db,
 	}
+}
+
+func (s *PgUserStore) GetUser(name string) (*User, error) {
+	query := `SELECT id, created_at, updated_at, name FROM users WHERE name = $1`
+	row := s.db.QueryRow(query, name)
+
+	var u User
+	err := row.Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt, &u.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &u, nil
 }
 
 func (s *PgUserStore) CreateUser(name string) (*User, error) {
