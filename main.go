@@ -1,16 +1,23 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/igor570/aggregator/internal/config"
+	"github.com/igor570/aggregator/internal/database"
 	"github.com/igor570/aggregator/internal/handler"
 	"github.com/igor570/aggregator/internal/model"
+	_ "github.com/lib/pq"
 )
 
 func main() {
 	cfg, err := config.Read()
+
+	db, err := sql.Open("postgres", cfg.DBUrl)
+
+	dbQueries := database.New(db)
 
 	if err != nil {
 		fmt.Printf("ERROR: %v", err)
@@ -18,6 +25,7 @@ func main() {
 	}
 
 	state := model.State{
+		Db:  dbQueries,
 		Cfg: &cfg,
 	}
 
