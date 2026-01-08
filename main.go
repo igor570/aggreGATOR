@@ -31,7 +31,9 @@ func main() {
 
 	commands := model.Commands{Command: make(map[string]func(*model.State, model.Command) error)}
 
+	// Registered commands
 	commands.Register("login", handler.HandlerLogin)
+	commands.Register("register", handler.HandlerRegister)
 
 	userCommand := os.Args
 
