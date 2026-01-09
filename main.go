@@ -34,6 +34,10 @@ func main() {
 	// Registered commands
 	commands.Register("login", handler.HandlerLogin)
 	commands.Register("register", handler.HandlerRegister)
+	commands.Register("reset", handler.HandlerReset)
+	commands.Register("users", handler.HandleList)
+	commands.Register("agg", handler.HandlerAgg)
+	commands.Register("addfeed", handler.HandleAddFeed)
 
 	userCommand := os.Args
 

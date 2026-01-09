@@ -47,7 +47,7 @@ func HandlerRegister(s *model.State, cmd model.Command) error {
 	userName := cmd.Name[1]
 
 	userDTO := database.CreateUserParams{
-		ID:        uuid.NullUUID{UUID: uuid.New(), Valid: true},
+		ID:        uuid.New(),
 		Name:      userName,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -70,6 +70,89 @@ func HandlerRegister(s *model.State, cmd model.Command) error {
 
 	fmt.Printf("User: %v was successfully created in DB and set to config\n", userName)
 	fmt.Println(s.Cfg.User)
+
+	return nil
+}
+
+func HandlerReset(s *model.State, cmd model.Command) error {
+	err := s.Db.ResetUsers(context.Background())
+
+	if err != nil {
+		fmt.Printf("Could not reset the user table")
+		os.Exit(1)
+		return err
+	}
+
+	return nil
+}
+
+func HandleList(s *model.State, cmd model.Command) error {
+	users, err := s.Db.ListUsers(context.Background())
+
+	if err != nil {
+		fmt.Printf("Could not reset the user table")
+		os.Exit(1)
+		return err
+	}
+
+	for _, user := range users {
+		if s.Cfg.User == user.Name {
+			fmt.Printf("* %v (current)\n", user.Name)
+		} else {
+			fmt.Printf("* %v\n", user.Name)
+		}
+	}
+
+	return nil
+}
+
+func HandlerAgg(s *model.State, cmd model.Command) error {
+	if len(cmd.Name) < 2 {
+		return errors.New("the agg handler expects a single argument, the feed URL")
+	}
+
+	feedURL := cmd.Name[1]
+
+	feed, err := model.FetchFeed(context.Background(), feedURL)
+	if err != nil {
+		return err
+	}
+
+	// Do something with the feed (print, save to DB, etc.)
+	fmt.Printf("%v\n", feed)
+
+	return nil
+}
+
+func HandleAddFeed(s *model.State, cmd model.Command) error {
+	if len(cmd.Name) < 3 {
+		return errors.New("the add feed handler expects a name and URL to be provided")
+	}
+
+	feedName := cmd.Name[1]
+	feedUrl := cmd.Name[2]
+
+	// Get the user to wire reference for user_id
+	user, err := s.Db.GetUser(context.Background(), s.Cfg.User)
+	if err != nil {
+		return err
+	}
+
+	feed := database.CreateFeedParams{
+		ID:        uuid.New(),
+		UserID:    user.ID,
+		Name:      feedName,
+		Url:       feedUrl,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	createdFeed, err := s.Db.CreateFeed(context.Background(), feed)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Feed added: %s\n", createdFeed.Name)
 
 	return nil
 }

@@ -1,1 +1,3 @@
+ goose postgres "postgres://igormilosavljevic:@localhost:5432/gator" <cmd> - reset, up, down
+
 $1, $2, $3, and $4 are parameters that we'll be able to pass into the query in our Go code. The :one at the end of the query name tells SQLC that we expect to get back a single row (the created user), which we do get back because we added RETURNING * to the query.
