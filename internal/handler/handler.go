@@ -156,3 +156,29 @@ func HandleAddFeed(s *model.State, cmd model.Command) error {
 
 	return nil
 }
+
+func HandleGetFeeds(s *model.State, cmd model.Command) error {
+	feeds, err := s.Db.GetFeeds(context.Background())
+
+	if err != nil {
+		fmt.Printf("Could not get feeds")
+		os.Exit(1)
+		return err
+	}
+
+	for _, feed := range feeds {
+		user, err := s.Db.GetUserById(context.Background(), feed.UserID)
+
+		if err != nil {
+			fmt.Printf("Could not retrieve user for feed")
+			os.Exit(1)
+			return err
+		}
+
+		fmt.Printf("%v\n", feed.Name)
+		fmt.Printf("%v\n", feed.Url)
+		fmt.Printf("%v\n", user.Name)
+	}
+
+	return nil
+}
