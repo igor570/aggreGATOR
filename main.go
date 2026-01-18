@@ -38,10 +38,11 @@ func main() {
 	commands.Register("reset", handler.HandlerReset)
 	commands.Register("users", handler.HandleList)
 	commands.Register("agg", handler.HandlerAgg)
-	commands.Register("addfeed", middleware.MiddlewareLoggedIn(handler.HandleAddFeed))
 	commands.Register("feeds", handler.HandleGetFeeds)
+	commands.Register("addfeed", middleware.MiddlewareLoggedIn(handler.HandleAddFeed))
 	commands.Register("follow", middleware.MiddlewareLoggedIn(handler.HandleFollow))
 	commands.Register("following", middleware.MiddlewareLoggedIn(handler.HandleFollowing))
+	commands.Register("unfollow", middleware.MiddlewareLoggedIn(handler.HandleUnfollow))
 
 	userCommand := os.Args
 

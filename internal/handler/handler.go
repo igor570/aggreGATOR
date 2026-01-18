@@ -234,3 +234,21 @@ func HandleFollowing(s *model.State, cmd model.Command, user database.User) erro
 
 	return nil
 }
+
+func HandleUnfollow(s *model.State, cmd model.Command, user database.User) error {
+	if len(cmd.Name) < 2 {
+		return errors.New("the unfollow handler expects a single argument, the feed URL")
+	}
+
+	url := cmd.Name[1]
+
+	feed, err := s.Db.GetFeedByURL(context.Background(), url)
+
+	if err != nil {
+		return err
+	}
+
+	err = s.Db.Unfollow(context.Background(), database.UnfollowParams{UserID: user.ID, FeedID: feed.ID})
+
+	return nil
+}
