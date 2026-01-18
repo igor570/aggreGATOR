@@ -8,6 +8,7 @@ import (
 	"github.com/igor570/aggregator/internal/config"
 	"github.com/igor570/aggregator/internal/database"
 	"github.com/igor570/aggregator/internal/handler"
+	"github.com/igor570/aggregator/internal/middleware"
 	"github.com/igor570/aggregator/internal/model"
 	_ "github.com/lib/pq"
 )
@@ -37,10 +38,10 @@ func main() {
 	commands.Register("reset", handler.HandlerReset)
 	commands.Register("users", handler.HandleList)
 	commands.Register("agg", handler.HandlerAgg)
-	commands.Register("addfeed", handler.HandleAddFeed)
+	commands.Register("addfeed", middleware.MiddlewareLoggedIn(handler.HandleAddFeed))
 	commands.Register("feeds", handler.HandleGetFeeds)
-	commands.Register("follow", handler.HandleFollow)
-	commands.Register("following", handler.HandleFollowing)
+	commands.Register("follow", middleware.MiddlewareLoggedIn(handler.HandleFollow))
+	commands.Register("following", middleware.MiddlewareLoggedIn(handler.HandleFollowing))
 
 	userCommand := os.Args
 

@@ -124,19 +124,13 @@ func HandlerAgg(s *model.State, cmd model.Command) error {
 	return nil
 }
 
-func HandleAddFeed(s *model.State, cmd model.Command) error {
+func HandleAddFeed(s *model.State, cmd model.Command, user database.User) error {
 	if len(cmd.Name) < 3 {
 		return errors.New("the add feed handler expects a name and URL to be provided")
 	}
 
 	feedName := cmd.Name[1]
 	feedUrl := cmd.Name[2]
-
-	// Get the user to wire reference for user_id
-	user, err := s.Db.GetUser(context.Background(), s.Cfg.User)
-	if err != nil {
-		return err
-	}
 
 	feed := database.CreateFeedParams{
 		ID:        uuid.New(),
@@ -194,18 +188,12 @@ func HandleGetFeeds(s *model.State, cmd model.Command) error {
 	return nil
 }
 
-func HandleFollow(s *model.State, cmd model.Command) error {
+func HandleFollow(s *model.State, cmd model.Command, user database.User) error {
 	if len(cmd.Name) < 2 {
 		return errors.New("the follow handler expects a single argument, the feed URL")
 	}
 
 	url := cmd.Name[1]
-
-	user, err := s.Db.GetUser(context.Background(), s.Cfg.User)
-
-	if err != nil {
-		return err
-	}
 
 	feed, err := s.Db.GetFeedByURL(context.Background(), url)
 
@@ -233,13 +221,7 @@ func HandleFollow(s *model.State, cmd model.Command) error {
 	return nil
 }
 
-func HandleFollowing(s *model.State, cmd model.Command) error {
-	user, err := s.Db.GetUser(context.Background(), s.Cfg.User)
-
-	if err != nil {
-		return err
-	}
-
+func HandleFollowing(s *model.State, cmd model.Command, user database.User) error {
 	feedFollows, err := s.Db.GetFeedFollowsForUser(context.Background(), user.ID)
 
 	if err != nil {
