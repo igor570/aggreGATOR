@@ -152,6 +152,17 @@ func HandleAddFeed(s *model.State, cmd model.Command) error {
 		return err
 	}
 
+	args := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		UserID:    user.ID,
+		FeedID:    createdFeed.ID,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	// automatically follow the feed you made
+	_, err = s.Db.CreateFeedFollow(context.Background(), args)
+
 	fmt.Printf("Feed added: %s\n", createdFeed.Name)
 
 	return nil
@@ -178,6 +189,65 @@ func HandleGetFeeds(s *model.State, cmd model.Command) error {
 		fmt.Printf("%v\n", feed.Name)
 		fmt.Printf("%v\n", feed.Url)
 		fmt.Printf("%v\n", user.Name)
+	}
+
+	return nil
+}
+
+func HandleFollow(s *model.State, cmd model.Command) error {
+	if len(cmd.Name) < 2 {
+		return errors.New("the follow handler expects a single argument, the feed URL")
+	}
+
+	url := cmd.Name[1]
+
+	user, err := s.Db.GetUser(context.Background(), s.Cfg.User)
+
+	if err != nil {
+		return err
+	}
+
+	feed, err := s.Db.GetFeedByURL(context.Background(), url)
+
+	if err != nil {
+		return err
+	}
+
+	args := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	feedFollowRecord, err := s.Db.CreateFeedFollow(context.Background(), args)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(feedFollowRecord.FeedName)
+	fmt.Println(feedFollowRecord.UserName)
+
+	return nil
+}
+
+func HandleFollowing(s *model.State, cmd model.Command) error {
+	user, err := s.Db.GetUser(context.Background(), s.Cfg.User)
+
+	if err != nil {
+		return err
+	}
+
+	feedFollows, err := s.Db.GetFeedFollowsForUser(context.Background(), user.ID)
+
+	if err != nil {
+		return err
+	}
+
+	for _, v := range feedFollows {
+		fmt.Println(v.FeedName)
 	}
 
 	return nil
