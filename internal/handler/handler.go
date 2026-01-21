@@ -108,20 +108,46 @@ func HandleList(s *model.State, cmd model.Command) error {
 
 func HandlerAgg(s *model.State, cmd model.Command) error {
 	if len(cmd.Name) < 2 {
-		return errors.New("the agg handler expects a single argument, the feed URL")
+		return errors.New("the agg handler expects a single argument, the time between requests (e.g. 1m, 30s)")
 	}
 
-	feedURL := cmd.Name[1]
-
-	feed, err := model.FetchFeed(context.Background(), feedURL)
+	duration, err := time.ParseDuration(cmd.Name[1])
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid duration: %w", err)
 	}
 
-	// Do something with the feed (print, save to DB, etc.)
-	fmt.Printf("%v\n", feed)
+	fmt.Printf("Collecting feeds every %v\n", duration)
+	fmt.Println("=====================================")
 
-	return nil
+	// in the background this grabs the rss items from a feed in our db
+	ticker := time.NewTicker(duration)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
+	}
+}
+
+func scrapeFeeds(s *model.State) {
+	fetchedFeed, err := s.Db.GetNextFeedToFetch(context.Background())
+	if err != nil {
+		fmt.Printf("Error getting next feed: %v\n", err)
+		return
+	}
+
+	err = s.Db.MarkFeedFetched(context.Background(), fetchedFeed.ID)
+	if err != nil {
+		fmt.Printf("Error marking feed fetched: %v\n", err)
+		return
+	}
+
+	rssFeed, err := model.FetchFeed(context.Background(), fetchedFeed.Url)
+	if err != nil {
+		fmt.Printf("Error fetching feed %s: %v\n", fetchedFeed.Url, err)
+		return
+	}
+
+	for _, item := range rssFeed.Channel.Item {
+		fmt.Println(item.Title)
+	}
 }
 
 func HandleAddFeed(s *model.State, cmd model.Command, user database.User) error {
