@@ -25,19 +25,24 @@ func main() {
 		return
 	}
 
+	// State struct to pass around that holds config and db connection
 	state := model.State{
 		Db:  dbQueries,
 		Cfg: &cfg,
 	}
 
-	commands := model.Commands{Command: make(map[string]func(*model.State, model.Command) error)}
+	type HandlerFunction = func(*model.State, model.Command) error
+	commands := model.Commands{Command: make(map[string]HandlerFunction)}
 
 	// Registered commands
+	// - Auth
 	commands.Register("login", handler.HandlerLogin)
 	commands.Register("register", handler.HandlerRegister)
 	commands.Register("reset", handler.HandlerReset)
 	commands.Register("users", handler.HandleList)
+	// - Aggregation
 	commands.Register("agg", handler.HandlerAgg)
+	// - Feeds
 	commands.Register("feeds", handler.HandleGetFeeds)
 	commands.Register("addfeed", middleware.MiddlewareLoggedIn(handler.HandleAddFeed))
 	commands.Register("follow", middleware.MiddlewareLoggedIn(handler.HandleFollow))
