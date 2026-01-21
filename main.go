@@ -31,8 +31,8 @@ func main() {
 		Cfg: &cfg,
 	}
 
-	type HandlerFunction = func(*model.State, model.Command) error
-	commands := model.Commands{Command: make(map[string]HandlerFunction)}
+	// initialize commands with empty map
+	commands := model.Commands{Command: make(map[string]func(*model.State, model.Command) error)}
 
 	// Registered commands
 	// - Auth
