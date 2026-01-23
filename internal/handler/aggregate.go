@@ -30,25 +30,34 @@ func HandlerAgg(s *model.State, cmd model.Command) error {
 }
 
 func scrapeFeeds(s *model.State) {
+
+	// get the next feed to fetch
 	fetchedFeed, err := s.Db.GetNextFeedToFetch(context.Background())
 	if err != nil {
 		fmt.Printf("Error getting next feed: %v\n", err)
 		return
 	}
 
+	// update the feed as fetched
 	err = s.Db.MarkFeedFetched(context.Background(), fetchedFeed.ID)
 	if err != nil {
 		fmt.Printf("Error marking feed fetched: %v\n", err)
 		return
 	}
 
+	// get the rssFeed
 	rssFeed, err := model.FetchFeed(context.Background(), fetchedFeed.Url)
 	if err != nil {
 		fmt.Printf("Error fetching feed %s: %v\n", fetchedFeed.Url, err)
 		return
 	}
 
-	for _, item := range rssFeed.Channel.Item {
-		fmt.Println(item.Title)
+	// save the rss feed items to the db
+	err = model.SaveFeed(context.Background(), *s, fetchedFeed.ID, rssFeed.Channel.Item, 0)
+	if err != nil {
+		fmt.Printf("Error saving feed %s: %v\n", fetchedFeed.Url, err)
+		return
 	}
+
+	fmt.Printf("Saved %d posts from %s\n", len(rssFeed.Channel.Item), fetchedFeed.Name)
 }
