@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -137,6 +138,38 @@ func HandleUnfollow(s *model.State, cmd model.Command, user database.User) error
 	}
 
 	err = s.Db.Unfollow(context.Background(), database.UnfollowParams{UserID: user.ID, FeedID: feed.ID})
+
+	return nil
+}
+
+func HandleBrowse(s *model.State, cmd model.Command, user database.User) error {
+	limit := 2
+	if len(cmd.Name) >= 2 {
+		parsedLimit, err := strconv.Atoi(cmd.Name[1])
+		if err != nil {
+			return errors.New("limit must be a valid number")
+		}
+		limit = parsedLimit
+	}
+
+	posts, err := s.Db.GetPostsForUser(context.Background(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  int32(limit),
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Found %d posts:\n", len(posts))
+	for _, post := range posts {
+		fmt.Printf("Title: %s\n", post.Title)
+		fmt.Printf("URL: %s\n", post.Url)
+		fmt.Printf("Published: %s\n", post.PublishedAt.Format(time.RFC1123))
+		if post.Description.Valid {
+			fmt.Printf("Description: %s\n", post.Description.String)
+		}
+		fmt.Println("---")
+	}
 
 	return nil
 }

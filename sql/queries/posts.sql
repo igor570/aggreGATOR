@@ -1,4 +1,4 @@
--- name: CreatePost :one
+-- name: CreatePost :exec
 INSERT INTO posts (id, feed_id, title, url, description, published_at, created_at, updated_at)
 VALUES (
     $1,
@@ -9,12 +9,11 @@ VALUES (
     $6,
     $7,
     $8
-)
-RETURNING *;
+);
 
 -- name: GetPostsForUser :many
 SELECT posts.* FROM posts
-INNER JOIN feeds_follow ON feeds_follow.feed_id = posts.feed_id
-WHERE feeds_follow.user_id = $1
+INNER JOIN feed_follows ON feed_follows.feed_id = posts.feed_id
+WHERE feed_follows.user_id = $1
 ORDER BY posts.published_at DESC
 LIMIT $2;

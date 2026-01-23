@@ -2,11 +2,16 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
 	"errors"
 	"html"
 	"io"
 	"net/http"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/igor570/aggregator/internal/database"
 )
 
 type RSSFeed struct {
@@ -65,16 +70,46 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	return &RSSFeed, nil
 }
 
-func SaveFeed(ctx context.Context, s State, items []RSSItem, limit int) error {
+func SaveFeed(ctx context.Context, s State, feedID uuid.UUID, items []RSSItem, limit int) error {
 	if len(items) == 0 {
-		errors.New("No items to process into the DB")
+		return errors.New("no items to process into the DB")
 	}
 
+	// apply limit if specified
+	if limit > 0 && limit < len(items) {
+		items = items[:limit]
+	}
+
+	now := time.Now()
+
 	// for each item we need to add it to the DB
-	for _, v := range items {
-		// save items to db
+	for _, item := range items {
+		pubDate, err := time.Parse(time.RFC1123Z, item.PubDate)
+		if err != nil {
+			// try alternative format
+			pubDate, err = time.Parse(time.RFC1123, item.PubDate)
+			if err != nil {
+				pubDate = now
+			}
+		}
+
+		post := database.CreatePostParams{
+			ID:          uuid.New(),
+			FeedID:      feedID,
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: sql.NullString{String: item.Description, Valid: item.Description != ""},
+			PublishedAt: pubDate,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		}
+
+		err = s.Db.CreatePost(ctx, post)
+		if err != nil {
+			// skip duplicates, continue with other items
+			continue
+		}
 	}
 
 	return nil
-
 }
