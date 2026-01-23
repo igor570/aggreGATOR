@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"html"
 	"io"
 	"net/http"
@@ -62,4 +63,18 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 
 	return &RSSFeed, nil
+}
+
+func SaveFeed(ctx context.Context, s State, items []RSSItem, limit int) error {
+	if len(items) == 0 {
+		errors.New("No items to process into the DB")
+	}
+
+	// for each item we need to add it to the DB
+	for _, v := range items {
+		// save items to db
+	}
+
+	return nil
+
 }
