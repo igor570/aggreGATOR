@@ -22,7 +22,10 @@ func HandlerAgg(s *model.State, cmd model.Command) error {
 	fmt.Printf("Collecting feeds every %v\n", duration)
 	fmt.Println("=====================================")
 
-	// in the background this grabs the rss items from a feed in our db
+	// in the background this
+	// 1. gets an RSSFeed saved in our DB
+	// 2. Scrapes that RSSFeed to get RSSItems
+	// 3. Adds found RSSItems to the DB as posts.
 	ticker := time.NewTicker(duration)
 	for ; ; <-ticker.C {
 		scrapeFeeds(s)
